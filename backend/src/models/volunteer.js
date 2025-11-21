@@ -2,11 +2,14 @@ const mongoose = require("mongoose");
 
 const VolunteerSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
-    phone: { type: String, required: true },
-    skills: [{ type: String, required: true }],
-    availability: { type: String, required: true },
-    location: { type: String, required: true }
+    name: String,
+    email: { type: String, unique: true },
+    googleId: String,
+    phone: String,
+    skills: [String],
+    availability: String,
+    location: String,
+    avatar: String
   },
   { timestamps: true }
 );
