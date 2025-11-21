@@ -74,7 +74,6 @@ const OfferHelp = () => {
         <Card className="p-6 md:p-8 shadow-elegant hover:shadow-hover transition-shadow border-success/20">
           <div className="mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-sm font-medium mb-3">
-              <Heart className="h-4 w-4" />
               <span>Volunteer Registration</span>
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2">Offer Help</h1>

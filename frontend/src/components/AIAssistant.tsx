@@ -37,12 +37,10 @@ const AIAssistant = () => {
     <Card className="p-4 sticky top-4 shadow-elegant hover:shadow-hover transition-shadow border-primary/10 animate-slide-in-right">
       <div className="flex items-center gap-3 mb-4 pb-4 border-b border-border">
         <div className="p-2 rounded-lg gradient-primary">
-          <Bot className="h-5 w-5 text-white" />
         </div>
         <div className="flex-1">
           <h2 className="font-semibold text-lg">AI Assistant</h2>
           <p className="text-xs text-muted-foreground flex items-center gap-1">
-            <Sparkles className="h-3 w-3" />
             Powered by AI
           </p>
         </div>
