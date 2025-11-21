@@ -45,23 +45,54 @@ const ReportNeed = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // TODO: Replace with actual API call
-    // await fetch('/api/needs', { method: 'POST', body: JSON.stringify(formData) });
-    
+  if (!formData.disasterType || !formData.urgency) {
+    toast({
+      title: "Missing Fields",
+      description: "Please select disaster type and urgency level.",
+      variant: "destructive",
+    });
+    setLoading(false);
+    return;
+  }
+
+  const payload = {
+    ...formData,
+    numberOfPeople: Number(formData.numberOfPeople),
+  };
+
+  try {
+    const response = await fetch("http://localhost:5000/api/needs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.message || "Failed to report need");
+
     toast({
       title: "Need Reported Successfully",
       description: "Our team will coordinate help as soon as possible.",
     });
-    
-    setLoading(false);
+
     navigate("/dashboard");
-  };
+
+  } catch (error: any) {
+    toast({
+      title: "Error",
+      description: error.message,
+      variant: "destructive",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen gradient-hero py-8">

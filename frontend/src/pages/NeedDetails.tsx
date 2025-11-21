@@ -1,75 +1,154 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Phone, MapPin, Users, Calendar, AlertCircle } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  ArrowLeft,
+  Phone,
+  MapPin,
+  Users,
+  Calendar,
+  AlertCircle,
+} from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-
-// Mock data - in real app, fetch based on ID
-const mockNeed = {
-  id: "1",
-  name: "Rajesh Kumar",
-  phone: "+91 98765 43210",
-  disasterType: "flood",
-  needTypes: ["Food", "Medicine", "Shelter"],
-  numberOfPeople: 8,
-  location: "Patiala, Sector 22",
-  description: "Our entire neighborhood is flooded. We need immediate food supplies and medical assistance for elderly residents. The water level has risen to 4 feet and we're stuck on the first floor.",
-  urgency: "high",
-  status: "pending",
-  createdAt: "2024-01-20T10:30:00Z"
-};
-
-const mockVolunteers = [
-  { id: "v1", name: "Dr. Sarah Johnson", skills: ["Medical"], availability: "immediate" },
-  { id: "v2", name: "Ravi Singh", skills: ["Transportation", "General Help"], availability: "within-24h" },
-  { id: "v3", name: "Meera Patel", skills: ["Food Distribution"], availability: "immediate" }
-];
 
 const NeedDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { toast } = useToast();
-  const [status, setStatus] = useState(mockNeed.status);
+
+  const [need, setNeed] = useState<any>(null);
+  const [volunteers, setVolunteers] = useState<any[]>([]);
+  const [status, setStatus] = useState("");
   const [selectedVolunteer, setSelectedVolunteer] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  // ⭐ Fetch need details
+  useEffect(() => {
+    const fetchNeed = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/needs/${id}`);
+        const data = await res.json();
+
+        if (data.success) {
+          setNeed(data.need);
+          setStatus(data.need.status || "pending");
+        }
+      } catch (err) {
+        console.error("Failed to load need:", err);
+      }
+
+      setLoading(false);
+    };
+
+    fetchNeed();
+  }, [id]);
+
+  // ⭐ Fetch volunteers
+  useEffect(() => {
+    const fetchVolunteers = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/volunteers");
+        const data = await res.json();
+        if (data.success) setVolunteers(data.volunteers);
+      } catch (err) {
+        console.error("Failed to load volunteers:", err);
+      }
+    };
+
+    fetchVolunteers();
+  }, []);
 
   const getUrgencyColor = (urgency: string) => {
     switch (urgency) {
-      case "high": return "urgent";
-      case "medium": return "warning";
-      case "low": return "success";
-      default: return "muted";
+      case "high":
+        return "urgent";
+      case "medium":
+        return "warning";
+      case "low":
+        return "success";
+      default:
+        return "muted";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "pending": return "warning";
-      case "assigned": return "primary";
-      case "resolved": return "success";
-      default: return "muted";
+      case "pending":
+        return "warning";
+      case "assigned":
+        return "primary";
+      case "resolved":
+        return "success";
+      default:
+        return "muted";
     }
   };
 
-  const handleAssignVolunteer = () => {
-    if (!selectedVolunteer) return;
-    
-    toast({
-      title: "Volunteer Assigned",
-      description: "The volunteer has been notified and will reach out soon.",
-    });
-    setStatus("assigned");
+  // ⭐ Update status
+  const handleStatusChange = async (newStatus: string) => {
+    setStatus(newStatus);
+
+    try {
+      await fetch(`http://localhost:5000/api/needs/${id}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      toast({
+        title: "Status Updated",
+        description: `Status changed to ${newStatus}`,
+      });
+    } catch (err) {
+      console.error("Status update failed:", err);
+    }
   };
 
-  const handleStatusChange = (newStatus: string) => {
-    setStatus(newStatus);
-    toast({
-      title: "Status Updated",
-      description: `Request status changed to ${newStatus}`,
-    });
+  // ⭐ Assign volunteer
+  const handleAssignVolunteer = async () => {
+    if (!selectedVolunteer) return;
+
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/needs/${id}/assign`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ volunteerId: selectedVolunteer }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (data.success) {
+        setStatus("assigned");
+
+        toast({
+          title: "Volunteer Assigned",
+          description: "The volunteer has been notified.",
+        });
+      }
+    } catch (err) {
+      console.error("Volunteer assignment failed:", err);
+    }
   };
+
+  if (loading || !need) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading request...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background py-8">
@@ -86,24 +165,41 @@ const NeedDetails = () => {
         <div className="grid gap-6">
           {/* Main Details Card */}
           <Card className="p-6">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-4 mb-6">
               <div>
-                <h1 className="text-3xl font-bold text-foreground mb-2">{mockNeed.name}</h1>
+                <h1 className="text-3xl font-bold mb-2">{need.name}</h1>
+
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className={`bg-${getUrgencyColor(mockNeed.urgency)}/10 text-${getUrgencyColor(mockNeed.urgency)} border-${getUrgencyColor(mockNeed.urgency)}/20`}>
-                    {mockNeed.urgency.toUpperCase()} PRIORITY
+                  <Badge
+                    variant="outline"
+                    className={`bg-${getUrgencyColor(
+                      need.urgency
+                    )}/10 text-${getUrgencyColor(
+                      need.urgency
+                    )} border-${getUrgencyColor(need.urgency)}/20`}
+                  >
+                    {need.urgency.toUpperCase()} PRIORITY
                   </Badge>
-                  <Badge variant="outline" className={`bg-${getStatusColor(status)}/10 text-${getStatusColor(status)} border-${getStatusColor(status)}/20`}>
+
+                  <Badge
+                    variant="outline"
+                    className={`bg-${getStatusColor(
+                      status
+                    )}/10 text-${getStatusColor(
+                      status
+                    )} border-${getStatusColor(status)}/20`}
+                  >
                     {status.toUpperCase()}
                   </Badge>
+
                   <Badge variant="outline">
-                    {mockNeed.disasterType.toUpperCase()}
+                    {need.disasterType.toUpperCase()}
                   </Badge>
                 </div>
               </div>
-              
+
               <Select value={status} onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -115,67 +211,78 @@ const NeedDetails = () => {
             </div>
 
             <div className="grid gap-4">
-              <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="flex items-center gap-3">
                 <Phone className="h-5 w-5" />
-                <span className="font-medium">{mockNeed.phone}</span>
+                <span>{need.phone}</span>
               </div>
 
-              <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="flex items-center gap-3">
                 <MapPin className="h-5 w-5" />
-                <span>{mockNeed.location}</span>
+                <span>{need.location}</span>
               </div>
 
-              <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="flex items-center gap-3">
                 <Users className="h-5 w-5" />
-                <span>{mockNeed.numberOfPeople} people affected</span>
+                <span>{need.numberOfPeople} people affected</span>
               </div>
 
-              <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="flex items-center gap-3">
                 <Calendar className="h-5 w-5" />
-                <span>Reported {new Date(mockNeed.createdAt).toLocaleString()}</span>
+                <span>{new Date(need.createdAt).toLocaleString()}</span>
               </div>
             </div>
           </Card>
 
-          {/* Needs Card */}
+          {/* Need Types */}
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">Required Assistance</h2>
             <div className="flex flex-wrap gap-2">
-              {mockNeed.needTypes.map(need => (
-                <Badge key={need} variant="secondary" className="text-base px-4 py-2">
-                  {need}
+              {need.needTypes.map((n: string) => (
+                <Badge key={n} variant="secondary" className="px-4 py-2">
+                  {n}
                 </Badge>
               ))}
             </div>
           </Card>
 
-          {/* Description Card */}
+          {/* Description */}
           <Card className="p-6">
             <div className="flex items-start gap-3 mb-3">
-              <AlertCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
+              <AlertCircle className="h-5 w-5 mt-0.5" />
               <h2 className="text-xl font-semibold">Situation Details</h2>
             </div>
-            <p className="text-foreground leading-relaxed">{mockNeed.description}</p>
+            <p className="leading-relaxed">{need.description}</p>
           </Card>
 
-          {/* Assign Volunteer Card */}
+          {/* Assign Volunteer */}
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">Assign Volunteer</h2>
+
             <div className="space-y-4">
-              <Select value={selectedVolunteer} onValueChange={setSelectedVolunteer}>
+              <Select
+                value={selectedVolunteer}
+                onValueChange={setSelectedVolunteer}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a volunteer..." />
+                  <SelectValue placeholder="Select volunteer..." />
                 </SelectTrigger>
+
                 <SelectContent>
-                  {mockVolunteers.map(volunteer => (
-                    <SelectItem key={volunteer.id} value={volunteer.id}>
-                      {volunteer.name} - {volunteer.skills.join(", ")}
+                  {volunteers.length === 0 && (
+                    <SelectItem value="none" disabled>
+                      No volunteers available
+                    </SelectItem>
+                  )}
+
+                  {volunteers.map((v) => (
+                    <SelectItem key={v._id} value={v._id}>
+                      {v.name} — {v.skills.join(", ")}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
-              <Button 
+              <Button
                 onClick={handleAssignVolunteer}
                 disabled={!selectedVolunteer || status === "resolved"}
                 className="w-full"

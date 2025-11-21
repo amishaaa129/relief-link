@@ -41,23 +41,48 @@ const OfferHelp = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // TODO: Replace with actual API call
-    // await fetch('/api/volunteers', { method: 'POST', body: JSON.stringify(formData) });
-    
+  try {
+    const res = await fetch("http://localhost:5000/api/volunteers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("API Error:", data);
+      toast({
+        title: "Error",
+        description: data.message || "Registration failed.",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
     toast({
       title: "Thank You for Volunteering!",
       description: "We'll contact you when your skills are needed.",
     });
-    
-    setLoading(false);
+
     navigate("/");
-  };
+  } catch (error) {
+    console.error("Network error:", error);
+    toast({
+      title: "Network Error",
+      description: "Unable to reach the server.",
+      variant: "destructive",
+    });
+  }
+
+  setLoading(false);
+};
 
   return (
     <div className="min-h-screen gradient-hero py-8">

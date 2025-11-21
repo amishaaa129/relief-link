@@ -1,26 +1,29 @@
-const mongoose2 = require('mongoose');
-const Schema2 = mongoose2.Schema;
+const mongoose = require("mongoose");
 
+const NeedSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    phone: { type: String, required: true },
+    disasterType: { type: String, required: true },
+    needTypes: [{ type: String, required: true }],
+    numberOfPeople: { type: Number, required: true },
+    location: { type: String, required: true },
+    description: { type: String },
+    urgency: { type: String, required: true },
 
-const NeedSchema = new Schema2({
-title: { type: String, required: true },
-description: String,
-category: { type: String, index: true },
-quantity: Number,
-reporterName: String,
-contact: String,
-location: {
-type: { type: String, enum: ['Point'], default: 'Point' },
-coordinates: { type: [Number], index: '2dsphere' }
-},
-status: { type: String, enum: ['pending','assigned','fulfilled','rejected'], default: 'pending' },
-assignedTo: { type: Schema2.Types.ObjectId, ref: 'User', default: null },
-urgent: { type: Boolean, default: false },
-metadata: Schema2.Mixed
-}, { timestamps: true });
+    status: {
+      type: String,
+      enum: ["pending", "assigned", "resolved"],
+      default: "pending",
+    },
 
+    assignedVolunteer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Volunteer",
+      default: null,
+    }
+  },
+  { timestamps: true }
+);
 
-NeedSchema.index({ createdAt: 1 });
-
-
-module.exports = mongoose2.model('need', NeedSchema);
+module.exports = mongoose.model("Need", NeedSchema);

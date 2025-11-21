@@ -5,7 +5,7 @@ import { MapPin, Users, Clock, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface Need {
-  id: string;
+  _id: string;    // FIXED: MongoDB uses _id
   name: string;
   phone: string;
   disasterType: string;
@@ -44,8 +44,7 @@ const NeedCard = ({ need }: NeedCardProps) => {
   };
 
   const timeAgo = (date: string) => {
-    const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
-    
+    const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
     if (seconds < 60) return `${seconds}s ago`;
     const minutes = Math.floor(seconds / 60);
     if (minutes < 60) return `${minutes}m ago`;
@@ -56,29 +55,49 @@ const NeedCard = ({ need }: NeedCardProps) => {
   };
 
   return (
-    <Card 
+    <Card
       className="p-6 hover-lift cursor-pointer group shadow-elegant border-l-4 transition-all duration-300"
-      style={{ 
-        borderLeftColor: need.urgency === 'high' ? 'hsl(var(--urgent))' : 
-                        need.urgency === 'medium' ? 'hsl(var(--warning))' : 
-                        'hsl(var(--success))' 
+      style={{
+        borderLeftColor:
+          need.urgency === "high"
+            ? "hsl(var(--urgent))"
+            : need.urgency === "medium"
+            ? "hsl(var(--warning))"
+            : "hsl(var(--success))",
       }}
-      onClick={() => navigate(`/need/${need.id}`)}
+      onClick={() => navigate(`/need/${need._id}`)}   // FIXED
     >
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
         <div className="flex-1">
           <div className="flex items-start justify-between gap-4 mb-3">
-            <h3 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">{need.name}</h3>
+            <h3 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
+              {need.name}
+            </h3>
+
             <div className="flex gap-2 flex-shrink-0">
-              <Badge variant="outline" className={`bg-${getUrgencyColor(need.urgency)}/10 text-${getUrgencyColor(need.urgency)} border-${getUrgencyColor(need.urgency)}/20 whitespace-nowrap font-medium`}>
+              <Badge
+                variant="outline"
+                className={`bg-${getUrgencyColor(
+                  need.urgency
+                )}/10 text-${getUrgencyColor(
+                  need.urgency
+                )} border-${getUrgencyColor(need.urgency)}/20 whitespace-nowrap font-medium`}
+              >
                 {need.urgency.toUpperCase()}
               </Badge>
-              <Badge variant="outline" className={`bg-${getStatusColor(need.status)}/10 text-${getStatusColor(need.status)} border-${getStatusColor(need.status)}/20 whitespace-nowrap`}>
+              <Badge
+                variant="outline"
+                className={`bg-${getStatusColor(
+                  need.status
+                )}/10 text-${getStatusColor(
+                  need.status
+                )} border-${getStatusColor(need.status)}/20 whitespace-nowrap`}
+              >
                 {need.status.toUpperCase()}
               </Badge>
             </div>
           </div>
-          
+
           <div className="space-y-2 text-sm text-muted-foreground">
             <div className="flex items-center gap-2 hover:text-foreground transition-colors">
               <MapPin className="h-4 w-4" />
@@ -101,19 +120,19 @@ const NeedCard = ({ need }: NeedCardProps) => {
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4">
-        {need.needTypes.map(type => (
+        {need.needTypes.map((type) => (
           <Badge key={type} variant="secondary" className="hover:bg-secondary/80 transition-colors">
             {type}
           </Badge>
         ))}
       </div>
 
-      <Button 
-        variant="outline" 
+      <Button
+        variant="outline"
         className="w-full sm:w-auto group/btn hover:bg-primary hover:text-primary-foreground transition-all"
         onClick={(e) => {
           e.stopPropagation();
-          navigate(`/need/${need.id}`);
+          navigate(`/need/${need._id}`);   // FIXED
         }}
       >
         View Details
