@@ -114,9 +114,9 @@ const Dashboard = () => {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-            <Card className="p-4 bg-gradient-to-br from-card to-urgent/5 border-urgent/20 shadow-elegant">
-              <AlertTriangle className="h-5 w-5 text-urgent mb-2" />
-              <div className="text-2xl font-bold text-urgent">{highPriority}</div>
+            <Card className="p-4 bg-gradient-to-br from-card to-warning/5 border-warning/20 shadow-elegant">
+              <AlertTriangle className="h-5 w-5 text-warning mb-2" />
+              <div className="text-2xl font-bold text-warning">{highPriority}</div>
               <div className="text-sm text-muted-foreground">High Priority</div>
             </Card>
 
@@ -126,15 +126,15 @@ const Dashboard = () => {
               <div className="text-sm text-muted-foreground">Pending</div>
             </Card>
 
-            <Card className="p-4 bg-gradient-to-br from-card to-primary/5 border-primary/20 shadow-elegant">
-              <Users className="h-5 w-5 text-primary mb-2" />
-              <div className="text-2xl font-bold text-primary">{assigned}</div>
+            <Card className="p-4 bg-gradient-to-br from-card to-warning/5 border-warning/20 shadow-elegant">
+              <Users className="h-5 w-5 text-warning mb-2" />
+              <div className="text-2xl font-bold text-warning">{assigned}</div>
               <div className="text-sm text-muted-foreground">Assigned</div>
             </Card>
 
-            <Card className="p-4 bg-gradient-to-br from-card to-success/5 border-success/20 shadow-elegant">
-              <CheckCircle className="h-5 w-5 text-success mb-2" />
-              <div className="text-2xl font-bold text-success">{resolved}</div>
+            <Card className="p-4 bg-gradient-to-br from-card to-warning/5 border-warning/20 shadow-elegant">
+              <CheckCircle className="h-5 w-5 text-warning mb-2" />
+              <div className="text-2xl font-bold text-warning">{resolved}</div>
               <div className="text-sm text-muted-foreground">Resolved</div>
             </Card>
           </div>
