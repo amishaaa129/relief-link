@@ -88,7 +88,7 @@ const Index = () => {
       {/* Stats Section */}
       <div className="grid grid-cols-3 gap-6 py-12 max-w-2xl mx-auto text-center">
         <div className="group cursor-pointer">
-          <div className="text-3xl md:text-4xl font-bold gradient-primary bg-clip-text text-transparent mb-2">1,234</div>
+          <div className="text-3xl md:text-4xl font-bold mb-2">1,234</div>
           <div className="text-sm text-muted-foreground flex justify-center gap-1">
             <CheckCircle className="h-4 w-4" />
             Needs Resolved
